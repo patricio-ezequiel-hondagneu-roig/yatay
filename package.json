@@ -4,12 +4,16 @@
   "description": "Un lenguaje de programación nativo de América Latina.",
   "main": "dist/index.js",
   "scripts": {
+    "start": "node dist/index.js",
+	"start:watch": "nodemon -x \"node dist/index.js\"",
     "build": "tsc",
-	"build:watch": "tsc --watch"
+    "build:watch": "tsc --watch"
   },
   "author": "Patricio Ezequiel Hondagneu Roig",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^17.0.23",
+    "nodemon": "^2.0.15",
     "typescript": "^4.6.3"
   }
 }
