@@ -218,7 +218,7 @@ export class YatayScanner {
 					this.finishIdentifier();
 				} else {
 					this.announceError(
-						`[${this.line}] Unexpected character "${character}".`
+						`Se encontró un carácter inesperado: "${character}".`
 					);
 				}
 				break;
@@ -317,7 +317,7 @@ export class YatayScanner {
 		}
 
 		if (this.peek() === "\n" || this.isAtEnd) {
-			this.announceError("Unterminated string.");
+			this.announceError("No se encontró la comilla de cierre del texto.");
 			return;
 		}
 

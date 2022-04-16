@@ -2,3 +2,5 @@
 definir escribir_que_tendrá_2_hijos <= (persona) {
 	imprimir(persona + "tendrá " + 2.texto + " hijos.").
 }.
+
+definir &= "ahre
