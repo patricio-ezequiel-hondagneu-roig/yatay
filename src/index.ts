@@ -1,6 +1,6 @@
-import { YatayScanner } from "./yatay-scanner";
+import { existsSync, readFileSync } from "fs";
+import { argv } from "process";
+import { YatayCli } from "./yatay-cli";
 
-// TODO: Replace with better messaging.
-console.log("Yatay is running.");
-
-const scanner = new YatayScanner();
+const yatayCli = new YatayCli();
+yatayCli.run();
