@@ -17,6 +17,7 @@ export enum YatayTokenKind {
 	Minus = "Minus", // -
 	Asterisk = "Asterisk", // *
 	Slash = "Slash", // /
+	DoubleSlash = "Double slash", // //
 	Equal = "Equal", // =
 	Unequal = "Unequal", // ><
 	Less = "Less", // <

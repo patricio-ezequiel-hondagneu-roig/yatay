@@ -1,6 +1,6 @@
-:: Función de prueba nada más
-definir escribir_que_tendrá_2_hijos <= (persona) {
-	imprimir(persona + "tendrá " + 2.texto + " hijos.").
+::! Función que retorna _verdadero_ si el dividendo es divisible por el divisor y retorna _falso_ en caso contrario.
+definir es_divisible_por <= (dividendo divisor) {
+	devolver dividendo // divisor = 0.
 }.
 
-definir &= "ahre
+imprimir(es_divisible_por(dividendo divisor)).

@@ -168,7 +168,11 @@ export class YatayScanner {
 				break;
 			}
 			case "/": {
-				this.addToken(YatayTokenKind.Slash);
+				if (this.match("/")) {
+					this.addToken(YatayTokenKind.DoubleSlash);
+				} else {
+					this.addToken(YatayTokenKind.Slash);
+				}
 				break;
 			}
 			case "=": {
