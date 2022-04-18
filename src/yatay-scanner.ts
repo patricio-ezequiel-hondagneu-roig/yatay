@@ -297,7 +297,7 @@ export class YatayScanner {
 	 * @param message the message to include in the announced error.
 	 */
 	private announceError(message: string): void {
-		this.cli.announceError(this.line, message);
+		this.cli.announceScanningError(this.line, message);
 	}
 
 	/**

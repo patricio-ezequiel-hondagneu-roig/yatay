@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "fs";
 import { argv } from "process";
 import { yatayFileExtension } from "./constants";
+import { YatayParser } from "./yatay-parser";
 import { YatayScanner } from "./yatay-scanner";
+import { YatayToken, YatayTokenKind } from "./yatay-token";
 
 /**
  * The command line interface used to either interpret Yatay source code files or run Yatay's interactive shell.
@@ -15,7 +17,7 @@ export class YatayCli {
 	/**
 	 * It's _true_ if an error occurred during the scanning and _false_ otherwise.
 	 */
-	private hadScanningError: boolean = false;
+	private hadError: boolean = false;
 
 	constructor() {
 		// The command line arguments are stored starting from the third index.
@@ -38,13 +40,22 @@ export class YatayCli {
 	}
 
 	/**
-	 * Reports that an error occurred in the provided line, using the provided message.
+	 * Reports that a scanning error occurred in the provided line, using the provided message.
 	 *
 	 * @param line the line where the error occurred.
 	 * @param message the message to display about the error that occurred.
 	 */
-	announceError(line: number, message: string): void {
+	announceScanningError(line: number, message: string): void {
 		this.reportError(line, message);
+	}
+
+	announceParsingError(token: YatayToken, message: string): void {
+		if (token.kind === YatayTokenKind.EndOfFile) {
+			this.reportError(token.line, message, "el final");
+		}
+		else {
+			this.reportError(token.line, message, `"${token.lexeme}"`);
+		}
 	}
 
 	/**
@@ -66,7 +77,7 @@ export class YatayCli {
 		});
 		this.runSourceCode(sourceCode);
 
-		if (this.hadScanningError) {
+		if (this.hadError) {
 			process.exit(65);
 		}
 	}
@@ -91,8 +102,15 @@ export class YatayCli {
 		const tokens = scanner.scanTokens();
 
 		// TODO: Replace with actual implementation
-		console.log("\nTokens contained in the source code file:\n");
+		console.log("\Tokens en el código fuente:\n");
 		tokens.forEach((token) => console.log(String(token)));
+
+		const parser = new YatayParser(this, tokens);
+		const expression = parser.parse();
+
+		if (this.hadError) {
+			return;
+		}
 	}
 
 	/**
@@ -130,11 +148,11 @@ export class YatayCli {
 		location: string | null = null
 	): void {
 		if (location !== null) {
-			console.error(`[Línea ${line}] Error at ${location}: ${message}`);
+			console.error(`[Línea ${line}] Error en ${location}: ${message}`);
 		} else {
 			console.error(`[Línea ${line}] Error: ${message}`);
 		}
 
-		this.hadScanningError = true;
+		this.hadError = true;
 	}
 }

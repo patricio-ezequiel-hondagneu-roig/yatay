@@ -1,6 +1,8 @@
 ::! Función que retorna _verdadero_ si el dividendo es divisible por el divisor y retorna _falso_ en caso contrario.
-definir es_divisible_por <= (dividendo divisor) {
-	devolver dividendo // divisor = 0.
-}.
+:: definir es_divisible_por <= (dividendo divisor) {
+::	devolver dividendo // divisor = 0.
+:: }.
+::
+:: imprimir(es_divisible_por(dividendo divisor)).
 
-imprimir(es_divisible_por(dividendo divisor)).
+1 + 2 + 3
