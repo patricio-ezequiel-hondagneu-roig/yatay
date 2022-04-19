@@ -16,7 +16,7 @@ export class YatayCli {
 	private commandLineArguments: string[];
 
 	/**
-	 * It's _true_ if an error occurred during the scanning and _false_ otherwise.
+	 * It's _true_ if an error occurred during the scanning or parsing and _false_ otherwise.
 	 */
 	private hadError: boolean = false;
 
@@ -39,25 +39,6 @@ export class YatayCli {
 		}
 		else {
 			this.runPrompt();
-		}
-	}
-
-	/**
-	 * Reports that a scanning error occurred in the provided line, using the provided message.
-	 *
-	 * @param line the line where the error occurred.
-	 * @param message the message to display about the error that occurred.
-	 */
-	announceScanningError(line: number, message: string): void {
-		this.reportError(line, message);
-	}
-
-	announceParsingError(token: YatayToken, message: string): void {
-		if (token.kind === YatayTokenKind.EndOfFile) {
-			this.reportError(token.line, message, "el final");
-		}
-		else {
-			this.reportError(token.line, message, `"${token.lexeme}"`);
 		}
 	}
 
@@ -134,6 +115,31 @@ export class YatayCli {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Reports that a scanning error occurred in the provided line, using the provided message.
+	 *
+	 * @param line the line where the error was found.
+	 * @param message the message to display about the error.
+	 */
+	announceScanningError(line: number, message: string): void {
+		this.reportError(line, message);
+	}
+
+	/**
+	 * Reports that a parsing error was found in the provided token, using the provided message.
+	 *
+	 * @param token the token when the parsing error was found.
+	 * @param message the message to display about the error.
+	 */
+	announceParsingError(token: YatayToken, message: string): void {
+		if (token.kind === YatayTokenKind.EndOfFile) {
+			this.reportError(token.line, message, "el final");
+		}
+		else {
+			this.reportError(token.line, message, `"${token.lexeme}"`);
+		}
 	}
 
 	/**
