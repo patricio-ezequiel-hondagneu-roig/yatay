@@ -5,18 +5,22 @@ import { YatayToken, YatayTokenKind } from "./yatay-token";
  * Scanner that can extract the tokens contained in the character stream of a Yatay source code file.
  */
 export class YatayScanner {
+
 	/**
 	 * A reference to the calling CLI.
 	 */
 	private readonly cli: YatayCli;
+
 	/**
 	 * The source code stream to scan.
 	 */
 	private readonly sourceCode: string;
+
 	/**
 	 * The list of tokens successfully scanned from the source code stream.
 	 */
 	private readonly tokens: YatayToken[];
+
 	/**
 	 * A collection that matches lexemes with keyword kinds.
 	 */
@@ -26,10 +30,12 @@ export class YatayScanner {
 	 * The index of the first character of the currently processed token in the source code stream.
 	 */
 	private start = 0;
+
 	/**
 	 * The index of the current character in the source code stream.
 	 */
 	private current = 0;
+
 	/**
 	 * The line number of the current character in the source code stream.
 	 */
@@ -87,12 +93,7 @@ export class YatayScanner {
 			this.scanToken();
 		}
 
-		const endOfFileToken = new YatayToken(
-			YatayTokenKind.EndOfFile,
-			"",
-			null,
-			this.line
-		);
+		const endOfFileToken = new YatayToken(YatayTokenKind.EndOfFile, "", null, this.line);
 		this.tokens.push(endOfFileToken);
 
 		return this.tokens;
@@ -142,7 +143,8 @@ export class YatayScanner {
 			case ":": {
 				if (this.match(":")) {
 					this.consumeLineComment();
-				} else {
+				}
+				else {
 					this.addToken(YatayTokenKind.Colon);
 				}
 				break;
@@ -170,7 +172,8 @@ export class YatayScanner {
 			case "/": {
 				if (this.match("/")) {
 					this.addToken(YatayTokenKind.DoubleSlash);
-				} else {
+				}
+				else {
 					this.addToken(YatayTokenKind.Slash);
 				}
 				break;
@@ -178,7 +181,8 @@ export class YatayScanner {
 			case "=": {
 				if (this.match("<")) {
 					this.addToken(YatayTokenKind.LessOrEqual);
-				} else {
+				}
+				else {
 					this.addToken(YatayTokenKind.Equal);
 				}
 				break;
@@ -186,9 +190,11 @@ export class YatayScanner {
 			case ">": {
 				if (this.match("<")) {
 					this.addToken(YatayTokenKind.Unequal);
-				} else if (this.match("=")) {
+				}
+				else if (this.match("=")) {
 					this.addToken(YatayTokenKind.GreaterOrEqual);
-				} else {
+				}
+				else {
 					this.addToken(YatayTokenKind.Greater);
 				}
 				break;
@@ -196,7 +202,8 @@ export class YatayScanner {
 			case "<": {
 				if (this.match("=")) {
 					this.addToken(YatayTokenKind.Assign);
-				} else {
+				}
+				else {
 					this.addToken(YatayTokenKind.Less);
 				}
 				break;
@@ -218,9 +225,11 @@ export class YatayScanner {
 			default: {
 				if (this.isDigit(character)) {
 					this.finishNumber();
-				} else if (this.isIdentifierStarter(character)) {
+				}
+				else if (this.isIdentifierStarter(character)) {
 					this.finishIdentifier();
-				} else {
+				}
+				else {
 					this.announceError(
 						`Se encontró un carácter inesperado: "${character}".`
 					);
@@ -238,7 +247,8 @@ export class YatayScanner {
 	private peek(): string {
 		if (this.isAtEnd) {
 			return "\0";
-		} else {
+		}
+		else {
 			return this.sourceCode.charAt(this.current);
 		}
 	}
@@ -249,7 +259,8 @@ export class YatayScanner {
 	private peekNext(): string {
 		if (this.isNextAtEnd) {
 			return "\0";
-		} else {
+		}
+		else {
 			return this.sourceCode.charAt(this.next);
 		}
 	}
@@ -433,4 +444,5 @@ export class YatayScanner {
 	private isIdentifierNonStarter(character: string): boolean {
 		return this.isAlphanumeric(character) || this.isSeparator(character);
 	}
+
 }

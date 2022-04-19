@@ -6,6 +6,7 @@ import { YatayExpression } from "./yatay-expression";
  * Class that represents an unary expression from Yatay's grammar.
  */
 export class YatayUnaryExpression extends YatayExpression {
+
 	constructor(
 		readonly operator: YatayToken,
 		readonly operand: YatayExpression
@@ -19,7 +20,9 @@ export class YatayUnaryExpression extends YatayExpression {
 
 		if (this.operator.kind === YatayTokenKind.Minus) {
 			return `${operator}${operand}`;
-		} else { // this.operator.kind === YatayTokenKind.KeywordNo
+		}
+		// this.operator.kind === YatayTokenKind.KeywordNo
+		else {
 			return `${operator} ${operand}`;
 		}
 	}
@@ -27,4 +30,5 @@ export class YatayUnaryExpression extends YatayExpression {
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitUnaryExpression(this);
 	}
+
 }

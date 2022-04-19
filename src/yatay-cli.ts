@@ -9,6 +9,7 @@ import { YatayToken, YatayTokenKind } from "./yatay-token";
  * The command line interface used to either interpret Yatay source code files or run Yatay's interactive shell.
  */
 export class YatayCli {
+
 	/**
 	 * The arguments passed when executing the command line interface.
 	 */
@@ -31,10 +32,12 @@ export class YatayCli {
 		if (this.commandLineArguments.length > 1) {
 			console.log(`Uso: yatay [archivo .${yatayFileExtension}]`);
 			process.exit(64);
-		} else if (this.commandLineArguments.length === 1) {
+		}
+		else if (this.commandLineArguments.length === 1) {
 			const filePath = this.commandLineArguments[0];
 			this.runFile(filePath);
-		} else {
+		}
+		else {
 			this.runPrompt();
 		}
 	}
@@ -66,15 +69,11 @@ export class YatayCli {
 	private runFile(filePath: string): void {
 		const canonicalFilePath = this.findCanonicalFilePath(filePath);
 		if (canonicalFilePath === null) {
-			console.log(
-				`El archivo de código fuente "${filePath}" no existe o no es posible leerlo.`
-			);
+			console.log(`El archivo de código fuente "${filePath}" no existe o no es posible leerlo.`);
 			return;
 		}
 
-		const sourceCode = readFileSync(canonicalFilePath, {
-			encoding: "utf8",
-		});
+		const sourceCode = readFileSync(canonicalFilePath, { encoding: "utf8" });
 		this.runSourceCode(sourceCode);
 
 		if (this.hadError) {
@@ -87,9 +86,7 @@ export class YatayCli {
 	 */
 	private runPrompt(): void {
 		// TODO: Replace with actual implementation
-		console.log(
-			"La ejecución interactiva de código Yatay estará lista próximamente."
-		);
+		console.log("La ejecución interactiva de código Yatay estará lista próximamente.");
 	}
 
 	/**
@@ -127,7 +124,8 @@ export class YatayCli {
 
 		if (filePath.endsWith(`.${yatayFileExtension}`)) {
 			canonicalFilePath = filePath;
-		} else {
+		}
+		else {
 			canonicalFilePath = `${filePath}.${yatayFileExtension}`;
 		}
 
@@ -153,10 +151,12 @@ export class YatayCli {
 	): void {
 		if (location !== null) {
 			console.error(`[Línea ${line}] Error en ${location}: ${message}`);
-		} else {
+		}
+		else {
 			console.error(`[Línea ${line}] Error: ${message}`);
 		}
 
 		this.hadError = true;
 	}
+
 }

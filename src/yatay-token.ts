@@ -49,18 +49,22 @@ export enum YatayTokenKind {
  * A lexical token returned from scanning a Yatay source file.
  */
 export class YatayToken extends Object {
+
 	/**
 	 * The kind of token.
 	 */
 	readonly kind: YatayTokenKind;
+
 	/**
 	 * The lexeme from the source code that the token represents.
 	 */
 	readonly lexeme: string;
+
 	/**
 	 * The literal value of the token in the source code, if applicable.
 	 */
 	readonly literal: string | number | null;
+
 	/**
 	 * The line number of the token in the source code.
 	 */
@@ -98,4 +102,5 @@ export class YatayToken extends Object {
 			}
 		}
 	}
+
 }

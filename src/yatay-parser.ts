@@ -8,11 +8,14 @@ import { YatayParseError } from "./yatay-parse-error";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
 
 export class YatayParser {
+
 	/**
 	 * A reference to the calling CLI.
 	 */
 	private readonly cli: YatayCli;
+
 	private readonly tokens: YatayToken[];
+
 	private currentTokenIndex = 0;
 
 	constructor(cli: YatayCli, tokens: YatayToken[]) {
@@ -42,7 +45,8 @@ export class YatayParser {
 				);
 			}
 			return expression;
-		} catch (error: unknown) {
+		}
+		catch (error: unknown) {
 			return null;
 		}
 	}
@@ -59,11 +63,7 @@ export class YatayParser {
 			const operator = this.previousToken;
 			const rightOperand = this.parseTerm();
 
-			expression = new YatayBinaryExpression(
-				leftOperand,
-				operator,
-				rightOperand
-			);
+			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
 
 		return expression;
@@ -77,11 +77,7 @@ export class YatayParser {
 			const operator = this.previousToken;
 			const rightOperand = this.parseFactor();
 
-			expression = new YatayBinaryExpression(
-				leftOperand,
-				operator,
-				rightOperand
-			);
+			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
 
 		return expression;
@@ -95,11 +91,7 @@ export class YatayParser {
 			const operator = this.previousToken;
 			const rightOperand = this.parseUnary();
 
-			expression = new YatayBinaryExpression(
-				leftOperand,
-				operator,
-				rightOperand
-			);
+			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
 
 		return expression;
@@ -111,7 +103,8 @@ export class YatayParser {
 			const operand = this.parseUnary();
 
 			return new YatayUnaryExpression(operator, operand);
-		} else {
+		}
+		else {
 			return this.parsePrimary();
 		}
 	}
@@ -119,20 +112,22 @@ export class YatayParser {
 	private parsePrimary(): YatayExpression {
 		if (this.matchAny(YatayTokenKind.KeywordVerdadero)) {
 			return new YatayLiteralExpression(true);
-		} else if (this.matchAny(YatayTokenKind.KeywordFalso)) {
+		}
+		else if (this.matchAny(YatayTokenKind.KeywordFalso)) {
 			return new YatayLiteralExpression(false);
-		} else if (
-			this.matchAny(YatayTokenKind.String, YatayTokenKind.Number)
-		) {
+		}
+		else if (this.matchAny(YatayTokenKind.String, YatayTokenKind.Number)) {
 			return new YatayLiteralExpression(this.previousToken.literal);
-		} else if (this.matchAny(YatayTokenKind.OpeningParenthesis)) {
+		}
+		else if (this.matchAny(YatayTokenKind.OpeningParenthesis)) {
 			const innerExpression = this.parseExpression();
 			this.consume(
 				YatayTokenKind.ClosingParenthesis,
 				'Se esperaba un ")" tras la expresión.'
 			);
 			return new YatayGroupingExpression(innerExpression);
-		} else {
+		}
+		else {
 			throw this.createParseError(
 				this.currentToken,
 				"Se esperaba una expresión."
@@ -152,21 +147,16 @@ export class YatayParser {
 		return this.previousToken;
 	}
 
-	private consume(
-		tokenKind: YatayTokenKind,
-		errorMessage: string
-	): YatayToken {
+	private consume(tokenKind: YatayTokenKind, errorMessage: string): YatayToken {
 		if (this.currentTokenIsOfKind(tokenKind)) {
 			return this.advance();
-		} else {
+		}
+		else {
 			throw this.createParseError(this.currentToken, errorMessage);
 		}
 	}
 
-	private createParseError(
-		token: YatayToken,
-		errorMessage: string
-	): YatayParseError {
+	private createParseError(token: YatayToken, errorMessage: string): YatayParseError {
 		this.cli.announceParsingError(token, errorMessage);
 		return new YatayParseError();
 	}
@@ -194,7 +184,10 @@ export class YatayParser {
 	}
 
 	private matchAnyTermOperator(): boolean {
-		return this.matchAny(YatayTokenKind.Plus, YatayTokenKind.Minus);
+		return this.matchAny(
+			YatayTokenKind.Plus,
+			YatayTokenKind.Minus
+		);
 	}
 
 	private matchAnyFactorOperator(): boolean {
@@ -206,6 +199,10 @@ export class YatayParser {
 	}
 
 	private matchAnyUnaryOperator(): boolean {
-		return this.matchAny(YatayTokenKind.Minus, YatayTokenKind.KeywordNo);
+		return this.matchAny(
+			YatayTokenKind.Minus,
+			YatayTokenKind.KeywordNo
+		);
 	}
+
 }

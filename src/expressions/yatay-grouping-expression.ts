@@ -5,6 +5,7 @@ import { YatayExpression } from "./yatay-expression";
  * Class that represents a grouping expression from Yatay's grammar.
  */
 export class YatayGroupingExpression extends YatayExpression {
+
 	constructor(readonly innerExpression: YatayExpression) {
 		super();
 	}
@@ -18,4 +19,5 @@ export class YatayGroupingExpression extends YatayExpression {
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitGroupingExpression(this);
 	}
+
 }

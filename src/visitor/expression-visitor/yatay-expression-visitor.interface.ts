@@ -7,6 +7,7 @@ import { YatayUnaryExpression } from "../../expressions/yatay-unary-expression";
  * Interface that defines the common behavior for visitor classes that operate on Yatay's Expression instances.
  */
 export interface YatayExpressionVisitor<R> {
+
 	/**
 	 * Operates on a Yatay binary expression and returns the result.
 	 *
@@ -34,4 +35,5 @@ export interface YatayExpressionVisitor<R> {
 	 * @param expression The unary expression to operate on.
 	 */
 	visitUnaryExpression(expression: YatayUnaryExpression): R;
+
 }

@@ -5,6 +5,7 @@ import { YatayExpression } from "./yatay-expression";
  * Class that represents a literal expression from Yatay's grammar.
  */
 export class YatayLiteralExpression extends YatayExpression {
+
 	constructor(readonly value: unknown) {
 		super();
 	}
@@ -12,9 +13,11 @@ export class YatayLiteralExpression extends YatayExpression {
 	toString(): string {
 		if (typeof this.value === "boolean") {
 			return this.value ? "verdadero" : "falso";
-		} else if (typeof this.value === "number") {
+		}
+		else if (typeof this.value === "number") {
 			return String(this.value).replace(".", ",");
-		} else {
+		}
+		else {
 			return String(this.value);
 		}
 	}
@@ -22,4 +25,5 @@ export class YatayLiteralExpression extends YatayExpression {
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitLiteralExpression(this);
 	}
+
 }
