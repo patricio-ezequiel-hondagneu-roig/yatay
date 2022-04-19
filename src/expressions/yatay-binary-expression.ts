@@ -14,6 +14,14 @@ export class YatayBinaryExpression extends YatayExpression {
 		super();
 	}
 
+	toString(): string {
+		const leftOperand = String(this.leftOperand);
+		const operator = this.operator.lexeme;
+		const rightOperand = String(this.rightOperand);
+
+		return `${leftOperand} ${operator} ${rightOperand}`;
+	}
+
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitBinaryExpression(this);
 	}

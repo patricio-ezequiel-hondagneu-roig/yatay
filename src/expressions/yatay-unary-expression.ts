@@ -1,5 +1,5 @@
 import { YatayExpressionVisitor } from "../visitor/expression-visitor/yatay-expression-visitor.interface";
-import { YatayToken } from "../yatay-token";
+import { YatayToken, YatayTokenKind } from "../yatay-token";
 import { YatayExpression } from "./yatay-expression";
 
 /**
@@ -11,6 +11,17 @@ export class YatayUnaryExpression extends YatayExpression {
 		readonly operand: YatayExpression
 	) {
 		super();
+	}
+
+	toString(): string {
+		const operator = this.operator.lexeme;
+		const operand = String(this.operand);
+
+		if (this.operator.kind === YatayTokenKind.Minus) {
+			return `${operator}${operand}`;
+		} else { // this.operator.kind === YatayTokenKind.KeywordNo
+			return `${operator} ${operand}`;
+		}
 	}
 
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {

@@ -34,7 +34,14 @@ export class YatayParser {
 
 	parse(): YatayExpression | null {
 		try {
-			return this.parseExpression();
+			const expression = this.parseExpression();
+			if (!this.currentTokenIsOfKind(YatayTokenKind.EndOfFile)) {
+				throw this.createParseError(
+					this.currentToken,
+					`Se encontró un token inesperado "${this.currentToken.lexeme}."`
+				);
+			}
+			return expression;
 		} catch (error: unknown) {
 			return null;
 		}
@@ -134,11 +141,7 @@ export class YatayParser {
 	}
 
 	private currentTokenIsOfKind(kind: YatayTokenKind): boolean {
-		if (this.isAtEnd) {
-			return false;
-		} else {
-			return this.currentToken.kind === kind;
-		}
+		return this.currentToken.kind === kind;
 	}
 
 	private advance(): YatayToken {

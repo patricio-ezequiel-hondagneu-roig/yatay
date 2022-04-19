@@ -102,7 +102,7 @@ export class YatayCli {
 		const tokens = scanner.scanTokens();
 
 		// TODO: Replace with actual implementation
-		console.log("\Tokens en el código fuente:\n");
+		console.log("\nTokens en el código fuente:\n");
 		tokens.forEach((token) => console.log(String(token)));
 
 		const parser = new YatayParser(this, tokens);
@@ -111,6 +111,10 @@ export class YatayCli {
 		if (this.hadError) {
 			return;
 		}
+
+		// TODO: Replace with actual implementation
+		console.log("\nExpresión en el árbol de sintáxis abstracto:\n");
+		console.log(String(expression));
 	}
 
 	/**

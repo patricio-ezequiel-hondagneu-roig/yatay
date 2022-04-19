@@ -9,6 +9,12 @@ export class YatayGroupingExpression extends YatayExpression {
 		super();
 	}
 
+	toString(): string {
+		const innerExpression = String(this.innerExpression);
+
+		return `(${innerExpression})`;
+	}
+
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitGroupingExpression(this);
 	}

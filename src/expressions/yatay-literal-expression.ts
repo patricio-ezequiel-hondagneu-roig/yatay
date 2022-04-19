@@ -9,6 +9,16 @@ export class YatayLiteralExpression extends YatayExpression {
 		super();
 	}
 
+	toString(): string {
+		if (typeof this.value === "boolean") {
+			return this.value ? "verdadero" : "falso";
+		} else if (typeof this.value === "number") {
+			return String(this.value).replace(".", ",");
+		} else {
+			return String(this.value);
+		}
+	}
+
 	accept<R>(visitor: YatayExpressionVisitor<R>): R {
 		return visitor.visitLiteralExpression(this);
 	}
