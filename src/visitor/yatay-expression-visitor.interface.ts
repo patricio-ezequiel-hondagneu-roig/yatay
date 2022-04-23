@@ -1,12 +1,9 @@
-import { YatayBinaryExpression } from "../../expressions/yatay-binary-expression";
-import { YatayGroupingExpression } from "../../expressions/yatay-grouping-expression";
-import { YatayLiteralExpression } from "../../expressions/yatay-literal-expression";
-import { YatayUnaryExpression } from "../../expressions/yatay-unary-expression";
+import { YatayBinaryExpression, YatayGroupingExpression, YatayLiteralExpression, YatayUnaryExpression } from "../expressions";
 
 /**
  * Interface that defines the common behavior for visitor classes that operate on Yatay's Expression instances.
  */
-export interface YatayExpressionVisitor<R> {
+export interface YatayExpressionVisitor<R = unknown> {
 
 	/**
 	 * Operates on a Yatay binary expression and returns the result.

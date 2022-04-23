@@ -1,4 +1,4 @@
-import { YatayExpressionVisitor, YatayVisitableExpression } from "../visitor/expression-visitor";
+import { YatayExpressionVisitor, YatayVisitableExpression } from "../visitor";
 
 /**
  * Base class for all of the expression productions in Yatay's grammar.

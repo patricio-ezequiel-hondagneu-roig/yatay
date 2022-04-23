@@ -1,10 +1,17 @@
-import { YatayBinaryExpression, YatayExpression, YatayGroupingExpression, YatayLiteralExpression, YatayUnaryExpression } from "./expressions";
-import { YatayExpressionVisitor } from "./visitor/expression-visitor";
+import {
+	YatayBinaryExpression,
+	YatayExpression,
+	YatayGroupingExpression,
+	YatayLiteralExpression,
+	YatayUnaryExpression
+} from "./expressions";
+import { YatayExpressionStatement, YatayStatement } from "./statements";
+import { YatayExpressionVisitor, YatayStatementVisitor } from "./visitor";
 import { YatayCli } from "./yatay-cli";
 import { YatayRuntimeError } from "./yatay-runtime-error";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
 
-export class YatayInterpreter implements YatayExpressionVisitor<unknown> {
+export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementVisitor<void> {
 
 	/**
 	 * A reference to the calling CLI.
@@ -15,11 +22,11 @@ export class YatayInterpreter implements YatayExpressionVisitor<unknown> {
 		this.cli = cli;
 	}
 
-	interpret(expression: YatayExpression): void {
+	interpret(statements: YatayStatement[]): void {
 		try {
-			const value = this.evaluateExpression(expression);
-			const stringifiedValue = this.stringify(value);
-			console.log(`El valor interpretado es:\n\n${stringifiedValue}`);
+			for (const statement of statements) {
+				this.executeStatement(statement);
+			}
 		}
 		catch (error) {
 			if (error instanceof YatayRuntimeError) {
@@ -29,6 +36,12 @@ export class YatayInterpreter implements YatayExpressionVisitor<unknown> {
 				throw error;
 			}
 		}
+	}
+
+	visitExpressionStatement(statement: YatayExpressionStatement): void {
+		// this.evaluateExpression(statement.expression);
+		const value = this.evaluateExpression(statement.expression);
+		console.log(`Expresión "${this.stringify(statement.expression)}" evaluada como ${this.stringify(value)}.`);
 	}
 
 	visitBinaryExpression(expression: YatayBinaryExpression): unknown {
@@ -124,6 +137,10 @@ export class YatayInterpreter implements YatayExpressionVisitor<unknown> {
 
 		// Unreachable code.
 		return null;
+	}
+
+	private executeStatement(statement: YatayStatement): void {
+		statement.accept(this);
 	}
 
 	private evaluateExpression(expression: YatayExpression): unknown {

@@ -1,4 +1,4 @@
-import { YatayExpressionVisitor } from "../visitor/expression-visitor/yatay-expression-visitor.interface";
+import { YatayExpressionVisitor } from "../visitor";
 import { YatayExpression } from "./yatay-expression";
 
 /**

@@ -5,6 +5,7 @@ import {
 	YatayLiteralExpression,
 	YatayUnaryExpression
 } from "./expressions";
+import { YatayExpressionStatement, YatayStatement } from "./statements";
 import { YatayCli } from "./yatay-cli";
 import { YatayParseError } from "./yatay-parse-error";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
@@ -53,22 +54,27 @@ export class YatayParser {
 	}
 
 	/**
-	 * Parses the provided list of tokens and returns the corresponding Expression, if applicable, or _null_ otherwise.
+	 * Parses the provided list of tokens and returns the corresponding list of statements.
 	 */
-	parse(): YatayExpression | null {
-		try {
-			const expression = this.parseExpression();
-			if (!this.currentTokenIsOfKind(YatayTokenKind.EndOfFile)) {
-				throw this.createParseError(
-					this.currentToken,
-					`Se encontró un token inesperado "${this.currentToken.lexeme}".`
-				);
-			}
-			return expression;
+	parse(): YatayStatement[] {
+		const statements: YatayStatement[] = [];
+
+		while (!this.isAtEnd) {
+			statements.push(this.parseStatement());
 		}
-		catch (error: unknown) {
-			return null;
-		}
+
+		return statements;
+	}
+
+	private parseStatement(): YatayStatement {
+		return this.parseExpressionStatement();
+	}
+
+	private parseExpressionStatement(): YatayStatement {
+		const expression = this.parseExpression();
+		this.consume(YatayTokenKind.Dot, 'Se esperaba un "." tras la sentencia.');
+
+		return new YatayExpressionStatement(expression);
 	}
 
 	/**

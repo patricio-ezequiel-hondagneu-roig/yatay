@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { argv } from "process";
+
 import { yatayFileExtension } from "./constants";
-import { YatayExpression } from "./expressions";
 import { YatayInterpreter } from "./yatay-interpreter";
 import { YatayParser } from "./yatay-parser";
 import { YatayRuntimeError } from "./yatay-runtime-error";
@@ -97,13 +97,13 @@ export class YatayCli {
 		const tokens = scanner.scanTokens();
 
 		const parser = new YatayParser(this, tokens);
-		const expression = parser.parse();
+		const statements = parser.parse();
 
 		if (this.hadError) {
 			return;
 		}
 
-		this.interpreter.interpret(expression as YatayExpression);
+		this.interpreter.interpret(statements);
 	}
 
 	/**
