@@ -1,7 +1,10 @@
 import { existsSync, readFileSync } from "fs";
 import { argv } from "process";
 import { yatayFileExtension } from "./constants";
+import { YatayExpression } from "./expressions";
+import { YatayInterpreter } from "./yatay-interpreter";
 import { YatayParser } from "./yatay-parser";
+import { YatayRuntimeError } from "./yatay-runtime-error";
 import { YatayScanner } from "./yatay-scanner";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
 
@@ -16,9 +19,19 @@ export class YatayCli {
 	private commandLineArguments: string[];
 
 	/**
+	 * The interpreter used to ultimately run the source code.
+	 */
+	private interpreter: YatayInterpreter = new YatayInterpreter(this);
+
+	/**
 	 * It's _true_ if an error occurred during the scanning or parsing and _false_ otherwise.
 	 */
 	private hadError: boolean = false;
+
+	/**
+	 * It's _true_ if an error ocurred during the interpretation and _false_ otherwise.
+	 */
+	private hadRuntimeError: boolean = false;
 
 	constructor() {
 		// The command line arguments are stored starting from the third index.
@@ -60,6 +73,10 @@ export class YatayCli {
 		if (this.hadError) {
 			process.exit(65);
 		}
+
+		if (this.hadRuntimeError) {
+			process.exit(70);
+		}
 	}
 
 	/**
@@ -79,10 +96,6 @@ export class YatayCli {
 		const scanner = new YatayScanner(this, sourceCode);
 		const tokens = scanner.scanTokens();
 
-		// TODO: Replace with actual implementation
-		console.log("\nTokens en el código fuente:\n");
-		tokens.forEach((token) => console.log(String(token)));
-
 		const parser = new YatayParser(this, tokens);
 		const expression = parser.parse();
 
@@ -90,9 +103,7 @@ export class YatayCli {
 			return;
 		}
 
-		// TODO: Replace with actual implementation
-		console.log("\nExpresión en el árbol de sintáxis abstracto:\n");
-		console.log(String(expression));
+		this.interpreter.interpret(expression as YatayExpression);
 	}
 
 	/**
@@ -140,6 +151,12 @@ export class YatayCli {
 		else {
 			this.reportError(token.line, message, `"${token.lexeme}"`);
 		}
+	}
+
+	announceRuntimeError(error: YatayRuntimeError): void {
+		console.error(`[Línea ${error.token.line}] ${error.message}`);
+
+		this.hadRuntimeError = true;
 	}
 
 	/**

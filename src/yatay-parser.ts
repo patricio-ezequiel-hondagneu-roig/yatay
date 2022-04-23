@@ -61,7 +61,7 @@ export class YatayParser {
 			if (!this.currentTokenIsOfKind(YatayTokenKind.EndOfFile)) {
 				throw this.createParseError(
 					this.currentToken,
-					`Se encontró un token inesperado "${this.currentToken.lexeme}."`
+					`Se encontró un token inesperado "${this.currentToken.lexeme}".`
 				);
 			}
 			return expression;
@@ -155,7 +155,7 @@ export class YatayParser {
 			return new YatayLiteralExpression(false);
 		}
 		else if (this.matchAny(YatayTokenKind.String, YatayTokenKind.Number)) {
-			return new YatayLiteralExpression(this.previousToken.literal);
+			return new YatayLiteralExpression(this.previousToken.literal as string | number);
 		}
 		else if (this.matchAny(YatayTokenKind.OpeningParenthesis)) {
 			const innerExpression = this.parseExpression();

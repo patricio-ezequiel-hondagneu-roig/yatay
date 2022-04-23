@@ -6,7 +6,7 @@ import { YatayExpression } from "./yatay-expression";
  */
 export class YatayLiteralExpression extends YatayExpression {
 
-	constructor(readonly value: unknown) {
+	constructor(readonly value: boolean | string | number) {
 		super();
 	}
 
