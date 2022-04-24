@@ -41,7 +41,7 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 	visitExpressionStatement(statement: YatayExpressionStatement): void {
 		// this.evaluateExpression(statement.expression);
 		const value = this.evaluateExpression(statement.expression);
-		console.log(`Expresión "${this.stringify(statement.expression)}" evaluada como ${this.stringify(value)}.`);
+		console.log(`Expresión [ ${statement.expression} ] evaluada como [ ${this.stringify(value)} ].`);
 	}
 
 	visitBinaryExpression(expression: YatayBinaryExpression): unknown {
@@ -208,7 +208,7 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 			});
 		}
 		else {
-			return String(value);
+			return `"${String(value)}"`;
 		}
 	}
 

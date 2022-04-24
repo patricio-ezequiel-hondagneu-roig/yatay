@@ -369,6 +369,12 @@ export class YatayScanner {
 				.substring(this.start, this.current)
 				.replace(",", ".")
 		);
+
+		if (value < Number.MIN_SAFE_INTEGER || value > Number.MAX_SAFE_INTEGER) {
+			this.announceError("La magnitud del número es demasiado grande para ser representada en memoria.");
+			return;
+		}
+
 		this.addToken(YatayTokenKind.Number, value);
 	}
 

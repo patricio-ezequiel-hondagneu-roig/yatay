@@ -96,6 +96,10 @@ export class YatayCli {
 		const scanner = new YatayScanner(this, sourceCode);
 		const tokens = scanner.scanTokens();
 
+		if (this.hadError) {
+			return;
+		}
+
 		const parser = new YatayParser(this, tokens);
 		const statements = parser.parse();
 

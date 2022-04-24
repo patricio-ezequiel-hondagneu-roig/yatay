@@ -18,7 +18,7 @@ export class YatayLiteralExpression extends YatayExpression {
 			return String(this.value).replace(".", ",");
 		}
 		else {
-			return String(this.value);
+			return `"${String(this.value)}"`;
 		}
 	}
 
