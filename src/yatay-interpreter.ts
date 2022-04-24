@@ -203,8 +203,7 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 				trailingZeroDisplay: "stripIfInteger",
 				roundingMode: "trunc",
 				useGrouping: false,
-				maximumFractionDigits: 8,
-				maximumSignificantDigits: 21,
+				maximumSignificantDigits: 21
 			});
 		}
 		else {

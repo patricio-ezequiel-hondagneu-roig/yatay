@@ -29,17 +29,17 @@ export class YatayScanner {
 	/**
 	 * The index of the first character of the currently processed token in the source code stream.
 	 */
-	private start = 0;
+	private tokenStart: number = 0;
 
 	/**
 	 * The index of the current character in the source code stream.
 	 */
-	private current = 0;
+	private currentIndex: number = 0;
 
 	/**
 	 * The line number of the current character in the source code stream.
 	 */
-	private line = 1;
+	private currentLine: number = 1;
 
 	constructor(cli: YatayCli, sourceCode: string) {
 		this.cli = cli;
@@ -64,24 +64,74 @@ export class YatayScanner {
 	}
 
 	/**
+	 * The index of the previous character in the source code stream.
+	 */
+	private get previousIndex(): number {
+		return this.currentIndex - 1;
+	}
+
+	/**
 	 * The index of the next character in the source code stream.
 	 */
-	private get next(): number {
-		return this.current + 1;
+	private get nextIndex(): number {
+		return this.currentIndex + 1;
+	}
+
+	/**
+	 * The previous character in the source code stream.
+	 */
+	private get previousCharacter(): string {
+		if (this.isAtStart) {
+			return "\0";
+		}
+		else {
+			return this.sourceCode.charAt(this.previousIndex);
+		}
+	}
+
+	/**
+	 * The current character in the source code stream.
+	 */
+	private get currentCharacter(): string {
+		if (this.isAtEnd) {
+			return "\0";
+		}
+		else {
+			return this.sourceCode.charAt(this.currentIndex);
+		}
+	}
+
+	/**
+	 * The next character in the source code stream.
+	 */
+	private get nextCharacter(): string {
+		if (this.isNextAtEnd) {
+			return "\0";
+		}
+		else {
+			return this.sourceCode.charAt(this.nextIndex);
+		}
+	}
+
+	/**
+	 * It's _true_ if the current character in the source code stream is at the start of file and _false_ otherwise.
+	 */
+	private get isAtStart(): boolean {
+		return this.currentIndex <= 0;
 	}
 
 	/**
 	 * It's _true_ if the current character in the source code stream is at the end of file and _false_ otherwise.
 	 */
 	private get isAtEnd(): boolean {
-		return this.current >= this.sourceCode.length;
+		return this.currentIndex >= this.sourceCode.length;
 	}
 
 	/**
 	 * It's _true_ if the next character in the source code stream is at the end of file and _false_ otherwise.
 	 */
 	private get isNextAtEnd(): boolean {
-		return this.next >= this.sourceCode.length;
+		return this.nextIndex >= this.sourceCode.length;
 	}
 
 	/**
@@ -89,11 +139,16 @@ export class YatayScanner {
 	 */
 	scanTokens(): YatayToken[] {
 		while (!this.isAtEnd) {
-			this.start = this.current;
+			this.tokenStart = this.currentIndex;
 			this.scanToken();
 		}
 
-		const endOfFileToken = new YatayToken(YatayTokenKind.EndOfFile, "", null, this.line);
+		const endOfFileToken: YatayToken = new YatayToken(
+			YatayTokenKind.EndOfFile,
+			"",
+			null,
+			this.currentLine
+		);
 		this.tokens.push(endOfFileToken);
 
 		return this.tokens;
@@ -105,7 +160,7 @@ export class YatayScanner {
 	 * Lexically invalid tokens are discarded and issued as errors.
 	 */
 	private scanToken(): void {
-		const character = this.advance();
+		const character: string = this.advance();
 
 		switch (character) {
 			case "(": {
@@ -215,7 +270,7 @@ export class YatayScanner {
 				break;
 			}
 			case "\n": {
-				this.line++;
+				this.currentLine++;
 				break;
 			}
 			case '"': {
@@ -240,36 +295,10 @@ export class YatayScanner {
 	}
 
 	/**
-	 * Returns the current character in the source code stream.
-	 *
-	 * @returns The current character in the source code stream.
-	 */
-	private peek(): string {
-		if (this.isAtEnd) {
-			return "\0";
-		}
-		else {
-			return this.sourceCode.charAt(this.current);
-		}
-	}
-
-	/**
-	 * Returns the next character in the source code stream.
-	 */
-	private peekNext(): string {
-		if (this.isNextAtEnd) {
-			return "\0";
-		}
-		else {
-			return this.sourceCode.charAt(this.next);
-		}
-	}
-
-	/**
 	 * Unconditionally consumes a character from the source code stream and returns it.
 	 */
 	private advance(): string {
-		return this.sourceCode[this.current++];
+		return this.sourceCode[this.currentIndex++];
 	}
 
 	/**
@@ -279,11 +308,11 @@ export class YatayScanner {
 	 * @param expected the character to compare with.
 	 */
 	private match(expected: string): boolean {
-		if (this.isAtEnd || this.sourceCode.charAt(this.current) !== expected) {
+		if (this.isAtEnd || this.sourceCode.charAt(this.currentIndex) !== expected) {
 			return false;
 		}
 
-		this.current++;
+		this.currentIndex++;
 		return true;
 	}
 
@@ -297,8 +326,14 @@ export class YatayScanner {
 		kind: YatayTokenKind,
 		literal: string | number | null = null
 	): void {
-		const lexeme = this.sourceCode.substring(this.start, this.current);
-		const newToken = new YatayToken(kind, lexeme, literal, this.line);
+		const lexeme: string = this.sourceCode.substring(this.tokenStart, this.currentIndex);
+		const newToken: YatayToken = new YatayToken(
+			kind,
+			lexeme,
+			literal,
+			this.currentLine
+		);
+
 		this.tokens.push(newToken);
 	}
 
@@ -308,14 +343,14 @@ export class YatayScanner {
 	 * @param message the message to include in the announced error.
 	 */
 	private announceError(message: string): void {
-		this.cli.announceScanningError(this.line, message);
+		this.cli.announceScanningError(this.currentLine, message);
 	}
 
 	/**
 	 * Consumes a line comment form the source code stream and discards it.
 	 */
 	private consumeLineComment(): void {
-		while (this.peek() !== "\n" && !this.isAtEnd) {
+		while (this.currentCharacter !== "\n" && !this.isAtEnd) {
 			this.advance();
 		}
 	}
@@ -327,11 +362,11 @@ export class YatayScanner {
 	 * If a new line or the end of the file is reached before finding a closing quotation mark, an error will be issued.
 	 */
 	private finishString(): void {
-		while (this.peek() !== '"' && this.peek() !== "\n" && !this.isAtEnd) {
+		while (this.currentCharacter !== '"' && this.currentCharacter !== "\n" && !this.isAtEnd) {
 			this.advance();
 		}
 
-		if (this.peek() === "\n" || this.isAtEnd) {
+		if (this.currentCharacter === "\n" || this.isAtEnd) {
 			this.announceError("No se encontró la comilla de cierre del texto.");
 			return;
 		}
@@ -340,8 +375,8 @@ export class YatayScanner {
 		this.advance();
 
 		const value: string = this.sourceCode.substring(
-			this.start + 1,
-			this.current - 1
+			this.tokenStart + 1,
+			this.currentIndex - 1
 		);
 		this.addToken(YatayTokenKind.String, value);
 	}
@@ -349,33 +384,78 @@ export class YatayScanner {
 	/**
 	 * Consumes a number from the source code stream (after having consumed the first digit) and adds the corresponding
 	 * token to the result.
+	 *
+	 * If a number separator is found in an inappropiate place, an error will be issued.
 	 */
 	private finishNumber(): void {
-		while (this.isDigit(this.peek())) {
-			this.advance();
+		this.consumeInteger();
+
+		if (this.isDecimalSeparator(this.currentCharacter) && this.isIntegerNonStarter(this.nextCharacter)) {
+			this.consumeDecimalSeparator();
+			this.consumeInteger();
 		}
 
-		if (this.peek() == "," && this.isDigit(this.peekNext())) {
-			// Consume the decimal separator ",".
-			this.advance();
-
-			while (this.isDigit(this.peek())) {
-				this.advance();
-			}
+		// Issue an error if the last character in the number was a number separator.
+		if (this.isNumberSeparator(this.previousCharacter)) {
+			this.announceError("Un número no puede terminar en guión bajo.");
 		}
 
 		const value: number = Number.parseFloat(
 			this.sourceCode
-				.substring(this.start, this.current)
-				.replace(",", ".")
+				.substring(this.tokenStart, this.currentIndex)
+				.replace(/,/g, ".")
+				.replace(/_/g, "")
 		);
 
-		if (value < Number.MIN_SAFE_INTEGER || value > Number.MAX_SAFE_INTEGER) {
-			this.announceError("La magnitud del número es demasiado grande para ser representada en memoria.");
-			return;
-		}
+		this.validateNumberIsRepresentable(value);
 
 		this.addToken(YatayTokenKind.Number, value);
+	}
+
+	/**
+	 * Consumes an integer number from the source code stream.
+	 *
+	 * If two or more number separators are found together, an error will be issued.
+	 */
+	private consumeInteger(): void {
+		while (this.isIntegerNonStarter(this.currentCharacter)) {
+			if (this.isNumberSeparator(this.previousCharacter) && this.isNumberSeparator(this.currentCharacter)) {
+				this.announceError("No pueden haber dos guiones bajos consecutivos en un número.");
+			}
+			this.advance();
+		}
+	}
+
+	/**
+	 * Consumes a decimal separator from the source code stream.
+	 *
+	 * If there are number separators either before or after the decimal separator, and error will be issued.
+	 */
+	private consumeDecimalSeparator(): void {
+		if (this.isNumberSeparator(this.previousCharacter)) {
+			this.announceError(
+				"No puede haber un guión bajo inmediatamente antes del separador decimal en un número."
+			);
+		}
+		if (this.isNumberSeparator(this.nextCharacter)) {
+			this.announceError(
+				"No puede haber un guión bajo inmediatamente después del separador decimal en un número."
+			);
+		}
+
+		// Consume the decimal separator ",".
+		this.advance();
+	}
+
+	/**
+	 * Asserts whether or not the number provided is accurately representable in memory, and issues an error if it is not.
+	 *
+	 * @param number the number being validated.
+	 */
+	private validateNumberIsRepresentable(number: number): void {
+		if (number < Number.MIN_SAFE_INTEGER || number > Number.MAX_SAFE_INTEGER) {
+			this.announceError("La magnitud del número es demasiado grande para ser representada en memoria.");
+		}
 	}
 
 	/**
@@ -383,48 +463,74 @@ export class YatayScanner {
 	 * corresponding token to the result.
 	 */
 	private finishIdentifier(): void {
-		while (this.isIdentifierNonStarter(this.peek())) {
+		while (this.isIdentifierNonStarter(this.currentCharacter)) {
 			this.advance();
 		}
 
-		const lexeme = this.sourceCode.substring(this.start, this.current);
-		const kind = this.keywordMap.get(lexeme) ?? YatayTokenKind.Identifier;
+		const lexeme: string = this.sourceCode.substring(this.tokenStart, this.currentIndex);
+		const kind: YatayTokenKind = this.keywordMap.get(lexeme) ?? YatayTokenKind.Identifier;
 
 		this.addToken(kind);
 	}
 
 	/**
-	 * Returns _true_ if the character passed is a numeric digit.
+	 * Returns _true_ if the character passed is a separator allowed in an number literal, and _false_ otherwise.
+	 *
+	 * @param character the character being checked.
+	 */
+	private isNumberSeparator(character: string): boolean {
+		return character === "_";
+	}
+
+	/**
+	 * Returns _true_ if the character passed is a decimal separator, and _false_ otherwise.
+	 *
+	 * @param character the character being checked.
+	 */
+	private isDecimalSeparator(character: string): boolean {
+		return character === ",";
+	}
+
+	/**
+	 * Returns _true_ if the character passed is a numeric digit, and _false_ otherwise.
 	 *
 	 * @param character the character being checked.
 	 */
 	private isDigit(character: string): boolean {
-		const digitRegex = /^[0-9]$/;
+		const digitRegex: RegExp = /^[0-9]$/;
 		return digitRegex.test(character);
 	}
 
 	/**
-	 * Returns _true_ if the character passed is alphabetic.
+	 * Returns _true_ if the character passed is alphabetic, and _false_ otherwise.
 	 *
 	 * @param character the character being checked.
 	 */
 	private isAlphabetic(character: string): boolean {
-		const identifierStartRegex = /^[a-záéíóúüñ]$/i;
+		const identifierStartRegex: RegExp = /^[a-záéíóúüñ]$/i;
 		return identifierStartRegex.test(character);
 	}
 
 	/**
-	 * Returns _true_ if the character passed is a separator allowed in an identifier.
+	 * Returns _true_ if the character passed is a separator allowed in an identifier, and _false_ otherwise.
 	 *
 	 * @param character the character being checked.
 	 */
-	private isSeparator(character: string): boolean {
-		const separatorRegex = /^_$/;
-		return separatorRegex.test(character);
+	private isIdentifierSeparator(character: string): boolean {
+		return character === "_";
 	}
 
 	/**
-	 * Returns _true_ if the character passed is alphanumeric.
+	 * Returns _true_ if the character passed is either a digit or a number separator, and _false_ otherwise.
+	 *
+	 * @param character the character being checked.
+	 */
+	private isIntegerNonStarter(character: string): boolean {
+		return this.isDigit(character) || this.isNumberSeparator(character);
+	}
+
+	/**
+	 * Returns _true_ if the character passed is alphanumeric, and _false_ otherwise.
 	 *
 	 * @param character the character being checked.
 	 */
@@ -438,7 +544,7 @@ export class YatayScanner {
 	 * @param character the character being checked.
 	 */
 	private isIdentifierStarter(character: string): boolean {
-		return this.isAlphabetic(character) || this.isSeparator(character);
+		return this.isAlphabetic(character) || this.isIdentifierSeparator(character);
 	}
 
 	/**
@@ -448,7 +554,7 @@ export class YatayScanner {
 	 * @param character the character being checked.
 	 */
 	private isIdentifierNonStarter(character: string): boolean {
-		return this.isAlphanumeric(character) || this.isSeparator(character);
+		return this.isAlphanumeric(character) || this.isIdentifierSeparator(character);
 	}
 
 }
