@@ -1,8 +1,11 @@
-:: Keep roundin' roundin' roundin' roundin' 🎵
-1 = 0,9999999999999999.
-1 = 0,99999999999999999.
+definir a <= 1.
+definir b <= 1.
 
-:: Literales
-9876543210,0123456789.
-"Algo de texto".
-verdadero.
+definir mayor <= a > b.
+definir mayor_o_igual <= a >= b.
+definir menor <= a < b.
+definir menor_o_igual <= a =< b.
+definir igual <= a = b.
+definir desigual <= a >< b.
+
+mayor. mayor_o_igual. menor. menor_o_igual. igual. desigual.

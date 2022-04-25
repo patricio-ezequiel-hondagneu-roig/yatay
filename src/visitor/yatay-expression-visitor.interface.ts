@@ -1,4 +1,5 @@
 import { YatayBinaryExpression, YatayGroupingExpression, YatayLiteralExpression, YatayUnaryExpression } from "../expressions";
+import { YatayVariableAccessExpression } from "../expressions/yatay-variable-access-expression";
 
 /**
  * Interface that defines the common behavior for visitor classes that operate on Yatay's Expression instances.
@@ -32,5 +33,12 @@ export interface YatayExpressionVisitor<R = unknown> {
 	 * @param expression The unary expression to operate on.
 	 */
 	visitUnaryExpression(expression: YatayUnaryExpression): R;
+
+	/**
+	 * Operates on a Yatay variable access expression and returns the result.
+	 *
+	 * @param expression the variable access expression to operate on.
+	 */
+	visitVariableAccessExpression(expression: YatayVariableAccessExpression): R;
 
 }

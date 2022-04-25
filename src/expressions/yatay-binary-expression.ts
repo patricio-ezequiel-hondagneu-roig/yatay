@@ -16,9 +16,9 @@ export class YatayBinaryExpression extends YatayExpression {
 	}
 
 	toString(): string {
-		const leftOperand = String(this.leftOperand);
-		const operator = this.operator.lexeme;
-		const rightOperand = String(this.rightOperand);
+		const leftOperand: string = String(this.leftOperand);
+		const operator: string = this.operator.lexeme;
+		const rightOperand: string = String(this.rightOperand);
 
 		return `${leftOperand} ${operator} ${rightOperand}`;
 	}

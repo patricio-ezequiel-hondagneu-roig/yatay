@@ -11,7 +11,7 @@ export class YatayGroupingExpression extends YatayExpression {
 	}
 
 	toString(): string {
-		const innerExpression = String(this.innerExpression);
+		const innerExpression: string = String(this.innerExpression);
 
 		return `(${innerExpression})`;
 	}

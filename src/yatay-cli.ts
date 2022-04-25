@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "fs";
 import { argv } from "process";
 
 import { yatayFileExtension } from "./constants";
+import { YatayStatement } from "./statements";
 import { YatayInterpreter } from "./yatay-interpreter";
 import { YatayParser } from "./yatay-parser";
 import { YatayRuntimeError } from "./yatay-runtime-error";
@@ -47,7 +48,7 @@ export class YatayCli {
 			process.exit(64);
 		}
 		else if (this.commandLineArguments.length === 1) {
-			const filePath = this.commandLineArguments[0];
+			const filePath: string = this.commandLineArguments[0];
 			this.runFile(filePath);
 		}
 		else {
@@ -61,13 +62,13 @@ export class YatayCli {
 	 * @param filePath the path of the source code file to run
 	 */
 	private runFile(filePath: string): void {
-		const canonicalFilePath = this.findCanonicalFilePath(filePath);
+		const canonicalFilePath: string | null = this.findCanonicalFilePath(filePath);
 		if (canonicalFilePath === null) {
 			console.log(`El archivo de código fuente "${filePath}" no existe o no es posible leerlo.`);
 			return;
 		}
 
-		const sourceCode = readFileSync(canonicalFilePath, { encoding: "utf8" });
+		const sourceCode: string = readFileSync(canonicalFilePath, { encoding: "utf8" });
 		this.runSourceCode(sourceCode);
 
 		if (this.hadError) {
@@ -93,15 +94,15 @@ export class YatayCli {
 	 * @param sourceCode the Yatay source code to execute.
 	 */
 	private runSourceCode(sourceCode: string): void {
-		const scanner = new YatayScanner(this, sourceCode);
-		const tokens = scanner.scanTokens();
+		const scanner: YatayScanner = new YatayScanner(this, sourceCode);
+		const tokens: YatayToken[] = scanner.scanTokens();
 
 		if (this.hadError) {
 			return;
 		}
 
-		const parser = new YatayParser(this, tokens);
-		const statements = parser.parse();
+		const parser: YatayParser = new YatayParser(this, tokens);
+		const statements: YatayStatement[] = parser.parse();
 
 		if (this.hadError) {
 			return;

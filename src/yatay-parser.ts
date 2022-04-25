@@ -5,7 +5,9 @@ import {
 	YatayLiteralExpression,
 	YatayUnaryExpression
 } from "./expressions";
+import { YatayVariableAccessExpression } from "./expressions/yatay-variable-access-expression";
 import { YatayExpressionStatement, YatayStatement } from "./statements";
+import { YatayVariableDeclarationStatement } from "./statements/yatay-varaible-declaration-statement";
 import { YatayCli } from "./yatay-cli";
 import { YatayParseError } from "./yatay-parse-error";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
@@ -25,7 +27,7 @@ export class YatayParser {
 	/**
 	 * The index of the token currently being pointed at.
 	 */
-	private currentTokenIndex = 0;
+	private currentTokenIndex: number = 0;
 
 	constructor(cli: YatayCli, tokens: YatayToken[]) {
 		this.cli = cli;
@@ -60,25 +62,77 @@ export class YatayParser {
 		const statements: YatayStatement[] = [];
 
 		while (!this.isAtEnd) {
-			statements.push(this.parseStatement());
+			const declaration: YatayStatement | null = this.parseDeclaration();
+			if (declaration !== null) {
+				statements.push(declaration);
+			}
 		}
 
 		return statements;
 	}
 
+	/**
+	 * Attempts to parse a deckaration (or any grammar rule of higher precedence) and returns it.
+	 */
+	private parseDeclaration(): YatayStatement | null {
+		try {
+			if (this.matchAny(YatayTokenKind.KeywordDefinir)) {
+				return this.parseVariableDeclaration();
+			}
+			else {
+				return this.parseStatement();
+			}
+		}
+		catch (error) {
+			if (error instanceof YatayParseError) {
+				this.synchronize();
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * Attempts to parse a variable declaration (or any grammar rule of higher precedence) and returns it.
+	 */
+	private parseVariableDeclaration(): YatayStatement {
+		const name: YatayToken = this.consume(
+			YatayTokenKind.Identifier,
+			`Se esperaba un identificador.`
+		);
+
+		let initializer: YatayExpression | null = null;
+		if (this.matchAny(YatayTokenKind.Assign)) {
+			initializer = this.parseExpression();
+		}
+
+		this.consume(
+			YatayTokenKind.Dot,
+			'Se esperaba un "." tras la sentencia.'
+		);
+
+		return new YatayVariableDeclarationStatement(name, initializer);
+	}
+
+	/**
+	 * Attempts to parse an statement (or any grammar rule of higher precedence) and returns it.
+	 */
 	private parseStatement(): YatayStatement {
 		return this.parseExpressionStatement();
 	}
 
+	/**
+	 * Attempts to parse an expression statement (or any grammar rule of higher precedence) and returns it.
+	 */
 	private parseExpressionStatement(): YatayStatement {
-		const expression = this.parseExpression();
+		const expression: YatayExpression = this.parseExpression();
 		this.consume(YatayTokenKind.Dot, 'Se esperaba un "." tras la sentencia.');
 
 		return new YatayExpressionStatement(expression);
 	}
 
 	/**
-	 * Attempts to parse an expression (or any grammar rule of higher precedense) and returns it.
+	 * Attempts to parse an expression (or any grammar rule of higher precedence) and returns it.
 	 */
 	private parseExpression(): YatayExpression {
 		return this.parseComparison();
@@ -88,12 +142,12 @@ export class YatayParser {
 	 * Attempts to parse a comparison expression (or any grammar rule of higher precedence) and returns it.
 	 */
 	private parseComparison(): YatayExpression {
-		let expression = this.parseTerm();
+		let expression: YatayExpression = this.parseTerm();
 
 		while (this.matchAnyComparisonOperator()) {
-			const leftOperand = expression;
-			const operator = this.previousToken;
-			const rightOperand = this.parseTerm();
+			const leftOperand: YatayExpression = expression;
+			const operator: YatayToken = this.previousToken;
+			const rightOperand: YatayExpression = this.parseTerm();
 
 			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
@@ -105,12 +159,12 @@ export class YatayParser {
 	 * Attempts to parse a term expression (or any grammar rule of higher precedence) and returns it.
 	 */
 	private parseTerm(): YatayExpression {
-		let expression = this.parseFactor();
+		let expression: YatayExpression = this.parseFactor();
 
 		while (this.matchAnyTermOperator()) {
-			const leftOperand = expression;
-			const operator = this.previousToken;
-			const rightOperand = this.parseFactor();
+			const leftOperand: YatayExpression = expression;
+			const operator: YatayToken = this.previousToken;
+			const rightOperand: YatayExpression = this.parseFactor();
 
 			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
@@ -122,12 +176,12 @@ export class YatayParser {
 	 * Attempts to parse a factor expression (or any grammar rule of higher precedence) and returns it.
 	 */
 	private parseFactor(): YatayExpression {
-		let expression = this.parseUnary();
+		let expression: YatayExpression = this.parseUnary();
 
 		while (this.matchAnyFactorOperator()) {
-			const leftOperand = expression;
-			const operator = this.previousToken;
-			const rightOperand = this.parseUnary();
+			const leftOperand: YatayExpression = expression;
+			const operator: YatayToken = this.previousToken;
+			const rightOperand: YatayExpression = this.parseUnary();
 
 			expression = new YatayBinaryExpression(leftOperand, operator, rightOperand);
 		}
@@ -140,8 +194,8 @@ export class YatayParser {
 	 */
 	private parseUnary(): YatayExpression {
 		if (this.matchAnyUnaryOperator()) {
-			const operator = this.previousToken;
-			const operand = this.parseUnary();
+			const operator: YatayToken = this.previousToken;
+			const operand: YatayExpression = this.parseUnary();
 
 			return new YatayUnaryExpression(operator, operand);
 		}
@@ -163,8 +217,11 @@ export class YatayParser {
 		else if (this.matchAny(YatayTokenKind.String, YatayTokenKind.Number)) {
 			return new YatayLiteralExpression(this.previousToken.literal as string | number);
 		}
+		else if (this.matchAny(YatayTokenKind.Identifier)) {
+			return new YatayVariableAccessExpression(this.previousToken);
+		}
 		else if (this.matchAny(YatayTokenKind.OpeningParenthesis)) {
-			const innerExpression = this.parseExpression();
+			const innerExpression: YatayExpression = this.parseExpression();
 			this.consume(
 				YatayTokenKind.ClosingParenthesis,
 				'Se esperaba un ")" tras la expresión.'
@@ -221,6 +278,33 @@ export class YatayParser {
 	private createParseError(token: YatayToken, errorMessage: string): YatayParseError {
 		this.cli.announceParsingError(token, errorMessage);
 		return new YatayParseError();
+	}
+
+	/**
+	 * Attempts to synchronize the parser to a known state when it enters panic mode due to a parsing error.
+	 */
+	private synchronize(): void {
+		this.advance();
+
+		while (!this.isAtEnd) {
+
+			if (this.previousToken.kind === YatayTokenKind.Dot) {
+				return;
+			}
+
+			switch (this.currentToken.kind) {
+				case YatayTokenKind.KeywordClase:
+				case YatayTokenKind.KeywordDefinir:
+				case YatayTokenKind.KeywordDevolver:
+				case YatayTokenKind.KeywordMientras:
+				case YatayTokenKind.KeywordRepetir:
+				case YatayTokenKind.KeywordSi: {
+					return;
+				}
+			}
+
+			this.advance();
+		}
 	}
 
 	/**

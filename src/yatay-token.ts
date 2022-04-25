@@ -86,7 +86,7 @@ export class YatayToken extends Object {
 	/**
 	 * Returns a textual representation of the token.
 	 */
-	toString() {
+	toString(): string {
 		switch (this.kind) {
 			case YatayTokenKind.String: {
 				return `[ ${this.kind}: "${this.literal}" ]`;

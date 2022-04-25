@@ -5,9 +5,12 @@ import {
 	YatayLiteralExpression,
 	YatayUnaryExpression
 } from "./expressions";
+import { YatayVariableAccessExpression } from "./expressions/yatay-variable-access-expression";
 import { YatayExpressionStatement, YatayStatement } from "./statements";
+import { YatayVariableDeclarationStatement } from "./statements/yatay-varaible-declaration-statement";
 import { YatayExpressionVisitor, YatayStatementVisitor } from "./visitor";
 import { YatayCli } from "./yatay-cli";
+import { YatayEnvironment } from "./yatay-environment";
 import { YatayRuntimeError } from "./yatay-runtime-error";
 import { YatayToken, YatayTokenKind } from "./yatay-token";
 
@@ -18,8 +21,14 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 	 */
 	private readonly cli: YatayCli;
 
+	/**
+	 * The environment that corresponds to the current scope in the execution.
+	 */
+	private environment: YatayEnvironment;
+
 	constructor(cli: YatayCli) {
 		this.cli = cli;
+		this.environment = new YatayEnvironment();
 	}
 
 	interpret(statements: YatayStatement[]): void {
@@ -38,15 +47,25 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 		}
 	}
 
+	visitVariableDeclarationStatement(statement: YatayVariableDeclarationStatement): void {
+		let value: unknown | null = null;
+
+		if (statement.initializer !== null) {
+			value = this.evaluateExpression(statement.initializer);
+		}
+
+		this.environment.define(statement.name, value);
+	}
+
 	visitExpressionStatement(statement: YatayExpressionStatement): void {
-		// this.evaluateExpression(statement.expression);
-		const value = this.evaluateExpression(statement.expression);
+		// this.evaluateExpression(statement.expression); // TODO: Remove the rest once printing is available
+		const value: unknown = this.evaluateExpression(statement.expression);
 		console.log(`Expresión [ ${statement.expression} ] evaluada como [ ${this.stringify(value)} ].`);
 	}
 
 	visitBinaryExpression(expression: YatayBinaryExpression): unknown {
-		const leftOperand = this.evaluateExpression(expression.leftOperand);
-		const rightOperand = this.evaluateExpression(expression.rightOperand);
+		const leftOperand: unknown = this.evaluateExpression(expression.leftOperand);
+		const rightOperand: unknown = this.evaluateExpression(expression.rightOperand);
 
 		switch (expression.operator.kind) {
 			case YatayTokenKind.Equal: {
@@ -123,7 +142,7 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 	}
 
 	visitUnaryExpression(expression: YatayUnaryExpression): unknown {
-		const operand = this.evaluateExpression(expression.operand);
+		const operand: unknown = this.evaluateExpression(expression.operand);
 
 		switch (expression.operator.kind) {
 			case YatayTokenKind.KeywordNo: {
@@ -137,6 +156,10 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 
 		// Unreachable code.
 		return null;
+	}
+
+	visitVariableAccessExpression(expression: YatayVariableAccessExpression): unknown {
+		return this.environment.get(expression.name);
 	}
 
 	private executeStatement(statement: YatayStatement): void {
@@ -164,7 +187,7 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 	}
 
 	private assertOperandIsNumber(operand: unknown, operator: YatayToken): void {
-		const operandIsNumber = this.isNumber(operand);
+		const operandIsNumber: boolean = this.isNumber(operand);
 
 		if (!operandIsNumber) {
 			throw new YatayRuntimeError(operator, "Se esperaba que el operando fuera un número.");
@@ -172,8 +195,8 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 	}
 
 	private assertOperandsAreNumbers(leftOperand: unknown, rightOperand: unknown, operator: YatayToken): void {
-		const leftOperandIsNumber = this.isNumber(leftOperand);
-		const rightOperandIsNumber = this.isNumber(rightOperand);
+		const leftOperandIsNumber: boolean = this.isNumber(leftOperand);
+		const rightOperandIsNumber: boolean = this.isNumber(rightOperand);
 
 		if (!leftOperandIsNumber) {
 			if (!rightOperandIsNumber) {
@@ -188,6 +211,11 @@ export class YatayInterpreter implements YatayExpressionVisitor, YatayStatementV
 		}
 	}
 
+	/**
+	 * Returns the textual representation of a native ECMAScript value as it is expected in Yatay.
+	 *
+	 * @param value the value to represent as a Yatay text.
+	 */
 	private stringify(value: unknown): string {
 		if (value === true) {
 			return "verdadero";

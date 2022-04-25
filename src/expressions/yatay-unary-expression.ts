@@ -15,8 +15,8 @@ export class YatayUnaryExpression extends YatayExpression {
 	}
 
 	toString(): string {
-		const operator = this.operator.lexeme;
-		const operand = String(this.operand);
+		const operator: string = this.operator.lexeme;
+		const operand: string = String(this.operand);
 
 		if (this.operator.kind === YatayTokenKind.Minus) {
 			return `${operator}${operand}`;
